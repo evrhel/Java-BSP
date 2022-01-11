@@ -2,9 +2,15 @@ package com.evrhel.bsp;
 
 import static com.evrhel.bsp.Vector2.*;
 
+/**
+ * Class containing utilities for determining relative locations of objects.
+ */
 public class RelativePosition {
 
-    public static final int BEHIND = 0, FRONT = 1, INTERSECT = 2, ON = 3;
+    public static final int BEHIND = 0;         // The object is behind another object
+    public static final int FRONT = 1;          // The object is in front of another object
+    public static final int INTERSECT = 2;      // The object intersects another object
+    public static final int ON = 3;             // The object is on another object
 
     /**
      * Returns the relative position of a point to a plane.

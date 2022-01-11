@@ -2,15 +2,28 @@ package com.evrhel.bsp;
 
 import java.util.*;
 
+/**
+ * Defines a BSP tree.
+ */
 public class BSPTree implements Iterable<Polygon> {
 
-    private BSPNode root;
+    private final BSPNode root;
     private int polyCount;
 
+    /**
+     * Creates a BSP tree from a <code>List</code> of <code>Polygon</code>s.
+     *
+     * @param polys The <code>Polygon</code>s to generate the BSP tree from.
+     */
     public BSPTree(List<Polygon> polys) {
         this.root = genTree(polys);
     }
 
+    /**
+     * Returns the number of <code>Polygon</code>s this BSP tree has generated.
+     *
+     * @return The <code>Polygon</code> count.
+     */
     public int getPolygonCount() {
         return this.polyCount;
     }
@@ -66,7 +79,7 @@ public class BSPTree implements Iterable<Polygon> {
         return node;
     }
 
-    private class BSPNode {
+    private static class BSPNode {
         Polygon poly;
         BSPNode parent;
         BSPNode behind, front;

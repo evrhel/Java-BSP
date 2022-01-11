@@ -1,5 +1,8 @@
 package com.evrhel.bsp;
 
+/**
+ * 2-component floating-point vector
+ */
 public class Vector2 {
 
     public static Vector2 NaN() {

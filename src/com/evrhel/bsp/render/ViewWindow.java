@@ -5,24 +5,32 @@ import com.evrhel.bsp.Polygon;
 import com.evrhel.bsp.Vector2;
 import com.evrhel.bsp.World;
 
-import javax.swing.text.View;
 import java.awt.*;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
-import java.text.AttributedCharacterIterator;
 
+/**
+ * Defines a window to view a <code>World</code>.
+ */
 public class ViewWindow {
 
-    private World world;
-    private InternalWindow window;
+    private final World world;
+    private final InternalWindow window;
 
+    /**
+     * Create a new window from a <code>World</code>.
+     *
+     * @param world The <code>World</code> to create this window from.
+     */
     public ViewWindow(World world) {
         this.world = world;
         this.window = new InternalWindow();
     }
 
+    /**
+     * Shows this window.
+     */
     public void show() {
         this.window.setVisible(true);
     }
