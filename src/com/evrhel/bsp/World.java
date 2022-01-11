@@ -47,12 +47,45 @@ public class World {
     }
 
     private final List<Polygon> polys;
+    private final BSPTree bspTree;
+    private final Vector2 min, max;
 
     public World(List<Polygon> polys) {
         this.polys = new ArrayList<>(polys);
+
+        this.min = Vector2.Inf();
+        this.max = Vector2.NInf();
+        polys.forEach(poly -> {
+            Vector2 start = poly.getStart();
+            Vector2 end = poly.getEnd();
+
+            this.min.x = Math.min(this.min.x, start.x);
+            this.min.x = Math.min(this.min.x, end.x);
+            this.min.y = Math.min(this.min.y, start.y);
+            this.min.y = Math.min(this.min.y, end.y);
+
+            this.max.x = Math.max(this.max.x, start.x);
+            this.max.x = Math.max(this.max.x, end.x);
+            this.max.y = Math.max(this.max.y, start.y);
+            this.max.y = Math.max(this.max.y, end.y);
+        });
+
+        this.bspTree = new BSPTree(this.polys);
     }
 
-    public List<Polygon> segments() {
-        return Collections.unmodifiableList(polys);
+    public List<Polygon> getPolys() {
+        return Collections.unmodifiableList(this.polys);
+    }
+
+    public BSPTree getBspTree() {
+        return bspTree;
+    }
+
+    public Vector2 getMin() {
+        return new Vector2(this.min);
+    }
+
+    public Vector2 getMax() {
+        return new Vector2(this.max);
     }
 }

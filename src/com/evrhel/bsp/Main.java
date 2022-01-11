@@ -1,5 +1,7 @@
 package com.evrhel.bsp;
 
+import com.evrhel.bsp.render.ViewWindow;
+
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +15,12 @@ public class Main {
 
         List<Polygon> polys = Arrays.asList(polyA, polyB, polyC);
 
-        BSPTree tree = new BSPTree(polys);
-        tree.forEach(System.out::println);
+        World world = new World(polys);
+
+        ViewWindow win = new ViewWindow(world);
+        win.show();
+
+        /*BSPTree tree = new BSPTree(polys);
+        tree.forEach(System.out::println);*/
     }
 }

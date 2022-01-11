@@ -5,9 +5,14 @@ import java.util.*;
 public class BSPTree implements Iterable<Polygon> {
 
     private BSPNode root;
+    private int polyCount;
 
     public BSPTree(List<Polygon> polys) {
         this.root = genTree(polys);
+    }
+
+    public int getPolygonCount() {
+        return this.polyCount;
     }
 
     @Override
@@ -43,8 +48,12 @@ public class BSPTree implements Iterable<Polygon> {
                 behind.add(split[RelativePosition.BEHIND]);
                 front.add(split[RelativePosition.FRONT]);
                 break;
+            case RelativePosition.ON:
+                return null; // discard
             }
         }
+
+        this.polyCount++;
 
         node.behind = genTree(behind);
         if (node.behind != null)
