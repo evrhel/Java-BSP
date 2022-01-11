@@ -85,6 +85,6 @@ public class Polygon {
 
     @Override
     public String toString() {
-        return "Polygon[name=\"" + this.name + "\", " + this.start + " -> " + this.end + ")";
+        return "Polygon[name=\"" + this.name + "\", " + this.start + " -> " + this.end + ", normal=" + this.normal + "]";
     }
 }

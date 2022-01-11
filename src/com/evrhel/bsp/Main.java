@@ -1,26 +1,19 @@
 package com.evrhel.bsp;
 
 import java.io.FileNotFoundException;
+import java.util.Arrays;
+import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) {
-        Polygon poly = new Polygon("A", new Vector2(0, 0), new Vector2(1, -1));
-        Plane plane = new Plane(new Vector2(0, -1), new Vector2(0, -1));
+        Polygon polyA = new Polygon("A", new Vector2(0, 0), new Vector2(0, 1));
+        Polygon polyB = new Polygon("B", new Vector2(0, 0), new Vector2(1, 0));
+        Polygon polyC = new Polygon("C", new Vector2(-1, -1), new Vector2(1, 1));
 
-        int position = RelativePosition.positionOf(plane, poly);
-        if (position == RelativePosition.BEHIND) {
-            System.out.println("Polygon is behind plane");
-        } else if (position == RelativePosition.FRONT) {
-            System.out.println("Polygon is in front of plane");
-        } else {
-            Vector2 intersection = poly.intersection(plane);
-            System.out.println("Polygon intersects plane at " + intersection);
-            Polygon[] split = new Polygon[2];
-            poly.split(plane, split);
+        List<Polygon> polys = Arrays.asList(polyA, polyB, polyC);
 
-            System.out.println("Polygon split into: behind = " +
-                    split[RelativePosition.BEHIND] + " and front = " + split[RelativePosition.FRONT]);
-        }
+        BSPTree tree = new BSPTree(polys);
+        tree.forEach(System.out::println);
     }
 }
