@@ -28,6 +28,25 @@ public class BSPTree implements Iterable<Polygon> {
         return this.polyCount;
     }
 
+    /**
+     * Returns an iterator which returns <code>Polygon</code>s back-to-front
+     * relative to the give position.
+     *
+     * @param position The position to determine the order of the <code>Iterator</code>.
+     * @return A new <code>Iterator</code> over the <code>Polygon</code>s.
+     */
+    public Iterator<Polygon> iterator(Vector2 position) {
+        Queue<Polygon> polys = new LinkedList<>();
+        genPolyList(polys, position, this.root);
+        return polys.iterator();
+    }
+
+    /**
+     * Returns an <code>Iterator</code> over this tree. The <code>Iterator</code> returns
+     * <code>Polygon</code>s in an arbitrary order.
+     *
+     * @return A new <code>Iterator</code>.
+     */
     @Override
     public Iterator<Polygon> iterator() {
         return new BSPIterator();
@@ -42,7 +61,8 @@ public class BSPTree implements Iterable<Polygon> {
         Polygon rootPoly = polys.remove();
         Plane rootPlane = new Plane(rootPoly);
 
-        BSPNode node = new BSPNode(rootPoly);
+        BSPNode node = new BSPNode(rootPlane);
+        node.add(rootPoly);
         while (!polys.isEmpty()) {
             Polygon child = polys.remove();
 
@@ -62,11 +82,9 @@ public class BSPTree implements Iterable<Polygon> {
                 break;
             case RelativePosition.ON:
                 node.add(child);
-                return null; // discard
+                break;
             }
         }
-
-        this.polyCount++;
 
         node.behind = genTree(behind);
         if (node.behind != null)
@@ -79,22 +97,46 @@ public class BSPTree implements Iterable<Polygon> {
         return node;
     }
 
-    private static class BSPNode {
+    private void genPolyList(Queue<Polygon> polyQueue, Vector2 position, BSPNode node) {
+        if (node == null) return;
+
+        int relativePosition = RelativePosition.positionOf(node.plane, position);
+        switch (relativePosition) {
+        case RelativePosition.FRONT:
+            genPolyList(polyQueue, position, node.behind);
+            polyQueue.addAll(node.polys);
+            genPolyList(polyQueue, position, node.front);
+            break;
+        case RelativePosition.BEHIND:
+            genPolyList(polyQueue, position, node.front);
+            polyQueue.addAll(node.polys);
+            genPolyList(polyQueue, position, node.behind);
+            break;
+        case RelativePosition.ON:
+            genPolyList(polyQueue, position, node.front);
+            genPolyList(polyQueue, position, node.behind);
+            break;
+        }
+    }
+
+    private class BSPNode {
         List<Polygon> polys;
+        Plane plane;
         BSPNode parent;
         BSPNode behind, front;
 
-        BSPNode(Polygon poly) {
+        BSPNode(Plane plane) {
+            this.plane = plane;
             this.polys = new ArrayList<>();
-            this.polys.add(poly);
         }
 
         void add(Polygon poly) {
             this.polys.add(poly);
+            BSPTree.this.polyCount++;
         }
     }
 
-    class BSPIterator implements Iterator<Polygon> {
+    private class BSPIterator implements Iterator<Polygon> {
 
         BSPNode next;
         Iterator<Polygon> currentIterator;

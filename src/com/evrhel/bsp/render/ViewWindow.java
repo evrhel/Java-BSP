@@ -6,9 +6,12 @@ import com.evrhel.bsp.Vector2;
 import com.evrhel.bsp.World;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
+import java.util.Iterator;
 
 /**
  * Defines a window to view a <code>World</code>.
@@ -69,17 +72,20 @@ public class ViewWindow {
         @Override
         public void windowDeactivated(WindowEvent e) { }
 
-        class RenderComponent extends Component {
+        class RenderComponent extends Component implements MouseListener {
 
             BufferedImage backBuffer;
             int width, height;
             Graphics graphics;
             Vector2 min, max;
+            int mouseX, mouseY;
+            Vector2 scale;
 
             RenderComponent() {
                 this.min = ViewWindow.this.world.getMin();
                 this.max = ViewWindow.this.world.getMax();
                 setPreferredSize(new Dimension(500, 500));
+                addMouseListener(this);
             }
 
             void setupBuffers() {
@@ -94,6 +100,9 @@ public class ViewWindow {
                 this.height = dim.height;
                 this.backBuffer = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
                 this.graphics = backBuffer.createGraphics();
+
+                this.scale = new Vector2(this.width / (this.max.x - this.min.y),
+                        this.height / (this.max.y - this.min.y));
             }
 
             @Override
@@ -135,15 +144,23 @@ public class ViewWindow {
 
             void drawWorld() {
                 World world = ViewWindow.this.world;
+                Vector2 worldMouse = toWorld(new Point(this.mouseX, this.mouseY));
+
                 BSPTree tree = world.getBspTree();
-                tree.forEach(this::drawPoly);
+                int idx = 0;
+                Iterator<Polygon> iterator = tree.iterator(worldMouse);
+                while (iterator.hasNext())
+                    drawPoly(idx++, iterator.next());
+
+                this.graphics.setColor(Color.BLUE);
+                this.graphics.fillRect(mouseX - 2, mouseY - 2, 5, 5);
 
                 this.graphics.setColor(Color.BLACK);
-                this.graphics.drawString(String.format("World Polys: %d Partitioned Polys: %d",
-                        world.getPolys().size(), tree.getPolygonCount()), 0, 10);
+                this.graphics.drawString(String.format("World Polys: %d Partitioned Polys: %d Mouse World: (%f, %f)",
+                        world.getPolys().size(), tree.getPolygonCount(), worldMouse.x, worldMouse.y), 0, 10);
             }
 
-            void drawPoly(Polygon poly) {
+            void drawPoly(int index, Polygon poly) {
                 Point start = toPoint(poly.getStart());
                 Point end = toPoint(poly.getEnd());
 
@@ -162,19 +179,40 @@ public class ViewWindow {
                 this.graphics.drawLine(normStart.x, normStart.y, (int)(normStart.x + normal.x), (int)(normStart.y + normal.y));
 
                 this.graphics.setColor(Color.BLACK);
+                this.graphics.drawString(Integer.toString(index), normStart.x, normStart.y);
+
+                this.graphics.setColor(Color.BLACK);
                 this.graphics.fillRect(start.x - 2, start.y - 2, 5, 5);
                 this.graphics.fillRect(end.x - 2, end.y - 2, 5, 5);
             }
 
             Point toPoint(Vector2 point) {
-                float x = this.width / (this.max.x - this.min.y);
-                float y = this.height / (this.max.y - this.min.y);
-
-                Vector2 toOrigin = point.sub(this.min);
-                Vector2 scaled = toOrigin.mul(new Vector2(x, y));
-
+                Vector2 scaled = point.sub(this.min).mul(this.scale);
                 return new Point((int)scaled.x, this.height - (int)scaled.y);
             }
+
+            Vector2 toWorld(Point point) {
+               return new Vector2(point.x, this.height - point.y).div(this.scale).add(this.min);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                this.mouseX = e.getX();
+                this.mouseY = e.getY();
+                repaint();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) { }
+
+            @Override
+            public void mouseReleased(MouseEvent e) { }
+
+            @Override
+            public void mouseEntered(MouseEvent e) { }
+
+            @Override
+            public void mouseExited(MouseEvent e) { }
         }
     }
 }
