@@ -16,7 +16,7 @@ public class BSPTree implements Iterable<Polygon> {
      * @param polys The <code>Polygon</code>s to generate the BSP tree from.
      */
     public BSPTree(List<Polygon> polys) {
-        this.root = genTree(polys);
+        this.root = genTree(new LinkedList<>(polys));
     }
 
     /**
@@ -33,19 +33,18 @@ public class BSPTree implements Iterable<Polygon> {
         return new BSPIterator();
     }
 
-    private BSPNode genTree(List<Polygon> polys) {
-        Iterator<Polygon> polygonIterator = polys.iterator();
-        if (!polygonIterator.hasNext()) return null;
+    private BSPNode genTree(Queue<Polygon> polys) {
+        if (polys.isEmpty()) return null;
 
         Polygon[] split = new Polygon[2];
-        List<Polygon> behind = new LinkedList<>(), front = new LinkedList<>();
+        Queue<Polygon> behind = new LinkedList<>(), front = new LinkedList<>();
 
-        Polygon rootPoly = polygonIterator.next();
+        Polygon rootPoly = polys.remove();
         Plane rootPlane = new Plane(rootPoly);
 
         BSPNode node = new BSPNode(rootPoly);
-        while (polygonIterator.hasNext()) {
-            Polygon child = polygonIterator.next();
+        while (!polys.isEmpty()) {
+            Polygon child = polys.remove();
 
             int pos = RelativePosition.positionOf(rootPlane, child);
             switch (pos) {
@@ -62,6 +61,7 @@ public class BSPTree implements Iterable<Polygon> {
                 front.add(split[RelativePosition.FRONT]);
                 break;
             case RelativePosition.ON:
+                node.add(child);
                 return null; // discard
             }
         }
@@ -80,60 +80,71 @@ public class BSPTree implements Iterable<Polygon> {
     }
 
     private static class BSPNode {
-        Polygon poly;
+        List<Polygon> polys;
         BSPNode parent;
         BSPNode behind, front;
 
         BSPNode(Polygon poly) {
-            this.poly = poly;
+            this.polys = new ArrayList<>();
+            this.polys.add(poly);
+        }
+
+        void add(Polygon poly) {
+            this.polys.add(poly);
         }
     }
 
     class BSPIterator implements Iterator<Polygon> {
 
         BSPNode next;
+        Iterator<Polygon> currentIterator;
 
         BSPIterator() {
             this.next = BSPTree.this.root;
             if (this.next != null) {
                 while (this.next.behind != null)
                     this.next = this.next.behind;
+                this.currentIterator = this.next.polys.iterator();
             }
         }
 
         @Override
         public boolean hasNext() {
-            return this.next != null;
+            return this.currentIterator != null;
         }
 
         @Override
         public Polygon next() {
-            if (this.next == null)
+            if (!hasNext())
                 throw new NoSuchElementException();
 
-            Polygon poly = this.next.poly;
+            Polygon result = this.currentIterator.next();
+            if (!this.currentIterator.hasNext()) {
+                this.currentIterator = null;
+                if (this.next.front != null) {
+                    this.next = this.next.front;
+                    while (this.next.behind != null)
+                        this.next = this.next.behind;
+                } else {
+                    do {
+                        if (this.next.parent == null) {
+                            this.next = null;
+                            break;
+                        }
 
-            if (this.next.front != null) {
-                this.next = this.next.front;
-                while (this.next.behind != null)
-                    this.next = this.next.behind;
-            } else {
-                do {
-                    if (this.next.parent == null) {
-                        this.next = null;
-                        break;
-                    }
+                        if (this.next.parent.behind == this.next) {
+                            this.next = this.next.parent;
+                            break;
+                        }
 
-                    if (this.next.parent.behind == this.next) {
                         this.next = this.next.parent;
-                        break;
-                    }
+                    } while (true);
+                }
 
-                    this.next = this.next.parent;
-                } while (true);
+                if (this.next != null)
+                    this.currentIterator = this.next.polys.iterator();
             }
-
-            return poly;
+            return result;
         }
     }
 }

@@ -162,8 +162,8 @@ public class ViewWindow {
                 this.graphics.drawLine(normStart.x, normStart.y, (int)(normStart.x + normal.x), (int)(normStart.y + normal.y));
 
                 this.graphics.setColor(Color.BLACK);
-                this.graphics.fillOval(start.x - 3, start.y - 3, 6, 6);
-                this.graphics.fillOval(end.x - 3, end.y - 3, 6, 6);
+                this.graphics.fillRect(start.x - 2, start.y - 2, 5, 5);
+                this.graphics.fillRect(end.x - 2, end.y - 2, 5, 5);
             }
 
             Point toPoint(Vector2 point) {
@@ -173,7 +173,7 @@ public class ViewWindow {
                 Vector2 toOrigin = point.sub(this.min);
                 Vector2 scaled = toOrigin.mul(new Vector2(x, y));
 
-                return new Point((int)scaled.x, (int)scaled.y);
+                return new Point((int)scaled.x, this.height - (int)scaled.y);
             }
         }
     }

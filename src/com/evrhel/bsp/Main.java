@@ -9,13 +9,14 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        Polygon polyA = new Polygon("A", new Vector2(0, 0), new Vector2(0, 1));
-        Polygon polyB = new Polygon("B", new Vector2(0, 0), new Vector2(1, 0));
-        Polygon polyC = new Polygon("C", new Vector2(-1, -1), new Vector2(1, 1));
+        Polygon polyA = new Polygon("A", new Vector2(1f, 0f), new Vector2(-1f, 0f));
+        Polygon polyB = new Polygon("B", new Vector2(-1f, -.5f), new Vector2(-1f, .5f));
+        Polygon polyC = new Polygon("C", new Vector2(1f, -1f), new Vector2(2f, .5f));
+        Polygon polyD = new Polygon("D", new Vector2(-2f, 1f), new Vector2(-.5f, -2f));
 
-        List<Polygon> polys = Arrays.asList(polyA, polyB, polyC);
+        List<Polygon> polys = Arrays.asList(polyA, polyB, polyC, polyD);
 
-        World world = new World(polys);
+       World world = new World(polys);
 
         ViewWindow win = new ViewWindow(world);
         win.show();
